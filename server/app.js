@@ -8,8 +8,15 @@ const path = require('path');
 const router = express.Router();
 const cors = require('cors');
 const connection = require('./db');
+const userRoutes = require('./routes/users');
+const authRoutes = require('./routes/auth');
+
+//use routes
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 //database connection
 connection();
+
 
 app.use(cors());
 const mainDir = path.join(__dirname, '../');

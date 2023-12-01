@@ -1,4 +1,5 @@
 //import necessary modules
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = 3000;
@@ -6,6 +7,10 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 const cors = require('cors');
+const connection = require('./db');
+//database connection
+connection();
+
 app.use(cors());
 const mainDir = path.join(__dirname, '../');
 const clientDir = path.join(__dirname, '../client');
@@ -13,11 +18,8 @@ app.use(express.static(mainDir));
 app.use(express.static(clientDir));
 const superheroList = [];
 
-
-
 app.get('/', (req, res) => res.send('Hello, World!'));
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
 
 
 //read superhero data from file

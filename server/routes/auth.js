@@ -16,6 +16,12 @@ router.post("/", async (req, res) => {
 		if (!user)
 			return res.status(401).send({ message: "Invalid Email or Password" });
 
+		
+		// Check if the account is deactivated
+		if (user.isDeactivated) {
+			return res.status(401).send({ message: "Account is deactivated. Contact the administrator." });
+			}
+
 		const validPassword = await bcrypt.compare(
 			req.body.password,
 			user.password

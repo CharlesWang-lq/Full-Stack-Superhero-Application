@@ -40,6 +40,26 @@ router.post("/", async (req, res) => {
 	}
 });
 
+router.post("/deactivate", async (req, res) => {
+	try {
+	  const { email } = req.body;
+	  const user = await User.findOne({ email });
+  
+	  if (!user) {
+		return res.status(404).send({ message: "User not found" });
+	  }
+  
+	  // Deactivate the account
+	  user.isDeactivated = true;
+	  await user.save();
+  
+	  res.status(200).send({ message: "Account deactivated successfully" });
+	} catch (error) {
+	  console.error(error);
+	  res.status(500).send({ message: "Internal Server Error" });
+	}
+  });
+
 router.get("/:id/verify/:token/", async (req, res) => {
 
 	try {

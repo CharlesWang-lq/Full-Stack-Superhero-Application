@@ -1,27 +1,62 @@
-.navbar {
+/* Reset some default margin and padding */
+body, h1, p {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  }
+  
+  /* Improved Navbar styling */
+  .navbar {
 	width: 100%;
 	height: 70px;
-	background-color: #3bb19b;
+	background-color: #2d3e50; /* Darker background color */
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-}
-
-.navbar h1 {
-	color: white;
-	font-size: 25px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* More prominent box shadow */
+	position: fixed; /* Make the navbar fixed at the top of the page */
+	top: 0;
+	z-index: 1000; /* Ensure it appears above other elements */
+  }
+  
+  .navbar h1 {
+	color: #ecf0f1; /* Lighter text color */
+	font-size: 28px; /* Slightly larger font size */
 	margin-left: 20px;
-}
-
-.white_btn {
+	font-family: 'Montserrat', sans-serif; /* Use a more modern font */
+  }
+  
+  .white_btn {
 	border: none;
 	outline: none;
-	padding: 12px 0;
-	background-color: white;
-	border-radius: 20px;
-	width: 120px;
+	padding: 14px 24px; /* Adjusted button padding for a more comfortable feel */
+	background-color: #3498db; /* Blue accent color */
+	border-radius: 30px; /* Slightly rounder corners */
 	font-weight: bold;
-	font-size: 14px;
+	font-size: 16px; /* Larger font size */
 	cursor: pointer;
-	margin-right: 20px;
-}
+	color: #ecf0f1; /* Light text color */
+	transition: background-color 0.3s ease, transform 0.3s ease; /* Add smooth transitions for hover effects */
+  }
+  
+  .white_btn:hover {
+	background-color: #2980b9; /* Darker blue on hover */
+	transform: scale(1.08); /* Increased scale effect on hover */
+  }
+  
+  /* Responsive design for smaller screens */
+  @media (max-width: 768px) {
+	.navbar {
+	  height: 60px; /* Adjust height for smaller screens */
+	}
+  
+	.navbar h1 {
+	  font-size: 22px; /* Decrease font size for smaller screens */
+	}
+  
+	.white_btn {
+	  padding: 12px 20px; /* Adjust button padding for smaller screens */
+	  font-size: 14px; /* Decrease font size for smaller screens */
+	}
+  }
+  

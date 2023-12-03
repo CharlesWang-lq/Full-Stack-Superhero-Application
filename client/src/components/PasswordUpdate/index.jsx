@@ -3,6 +3,8 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import styles from "./styles.module.css";
 
+const port = 3000;
+
 const PasswordUpdate = () => {
   const [data, setData] = useState({
     email: "",
@@ -19,7 +21,7 @@ const PasswordUpdate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = `http://${window.location.hostname}:3000/api/update`;
+      const url = `http://${window.location.hostname}:${port}/api/update`;
       const { data: res } = await axios.post(url, data);
       setSuccessMessage(res.message); // Set the success message
       setError(""); // Clear any existing error messages

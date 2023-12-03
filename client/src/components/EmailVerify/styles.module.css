@@ -1,0 +1,44 @@
+/* Add styles to your existing styles.module.css or create a new one */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    margin: 50px auto;
+    border: 1px solid #ddd; /* Add a border for a clean look */
+    border-radius: 10px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle box shadow */
+  }
+  
+  .success_img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+  
+  h1 {
+    color: #333; /* Dark text color */
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .green_btn {
+    padding: 12px 24px;
+    background-color: #4caf50; /* Green button color */
+    color: #fff; /* White text color */
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Add a smooth transition effect */
+  }
+  
+  .green_btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+  }
+  

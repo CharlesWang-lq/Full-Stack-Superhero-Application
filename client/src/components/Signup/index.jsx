@@ -1,8 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link} from "react-router-dom";
 import styles from "./styles.module.css";
 
+const port = 3000;
 const Signup = () => {
 	const [data, setData] = useState({
 		firstName: "",
@@ -11,7 +12,7 @@ const Signup = () => {
 		password: "",
 	});
 	const [error, setError] = useState("");
-	const navigate = useNavigate();
+	const [msg, setMsg] = useState("");
 
 	const handleChange = ({ currentTarget: input }) => {
 		setData({ ...data, [input.name]: input.value });
@@ -23,10 +24,10 @@ const Signup = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			const url = `http://${myurl}:3000/api/users`;
+			const url = `http://${myurl}:${port}/api/users`;
 			const { data: res } = await axios.post(url, data);
-			navigate("/login");
-			console.log(res.message);
+			setMsg(res.message);
+
 		} catch (error) {
 			if (
 				error.response &&
@@ -89,6 +90,7 @@ const Signup = () => {
 							className={styles.input}
 						/>
 						{error && <div className={styles.error_msg}>{error}</div>}
+						{msg && <div className={styles.success_msg}>{msg}</div>}
 						<button type="submit" className={styles.green_btn}>
 							Sign Up
 						</button>

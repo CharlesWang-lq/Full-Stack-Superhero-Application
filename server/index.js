@@ -8,6 +8,8 @@ const router = express.Router();
 const connection = require("./db");
 const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
+const updateRoutes = require("./routes/update");
+
 const port = 3000;
 const mainDir = path.join(__dirname, '../');
 const clientDir = path.join(__dirname, '../client');
@@ -25,6 +27,7 @@ app.use(cors());
 // routes
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/update", updateRoutes);
 
 //read superhero data from file
 function readSuperheroesData(filename) {

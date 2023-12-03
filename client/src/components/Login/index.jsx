@@ -11,10 +11,11 @@ const Login = () => {
 		setData({ ...data, [input.name]: input.value });
 	};
 
+	let myurl = window.location.hostname;
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			const url = "http://localhost:8080/api/auth";
+			const url = `http://${myurl}:3000/api/auth`;
 			const { data: res } = await axios.post(url, data);
 			localStorage.setItem("token", res.data);
 			window.location = "/";
@@ -62,7 +63,7 @@ const Login = () => {
 				<div className={styles.right}>
 					<h1>New Here ?</h1>
 					<Link to="/signup">
-						<button type="button" classNames={styles.white_btn}>
+						<button type="button" className={styles.white_btn}>
 							Sign Up
 						</button>
 					</Link>

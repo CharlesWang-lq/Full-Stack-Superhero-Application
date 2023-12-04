@@ -88,7 +88,6 @@ function readSuperheroesData(filename) {
   );
   
   router.get('/search', (req, res) => {
-    const sortBy = req.query.sortBy;
     const searchParams = req.query;
   
     let heroes = match(searchParams);
@@ -100,56 +99,71 @@ function readSuperheroesData(filename) {
     res.send({ results: heroes });
   });
   
-  function sortSuperheroes(superheroes, sortBy) {
-    sortBy = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
-    return superheroes.sort((a, b) => {
-      const valueA = String(a[sortBy]).toLowerCase();
-      const valueB = String(b[sortBy]).toLowerCase();
-  
-      if (valueA < valueB) return -1;
-      if (valueA > valueB) return 1;
-      return 0;
-    });
-  }
 
-  // Modified match function to handle multiple search terms
-  function match(searchParams) {
-    const matchingResults = [];
-  
-    for (const hero of superheroes) {
-      let isMatch = true;
-  
-      for (const [field, value] of Object.entries(searchParams)) {
-        const formattedField = field !== 'name' ? field.charAt(0).toUpperCase() + field.slice(1) : field;
-  
-        // Check if the search term is provided
-        if (value !== undefined && value !== null && value !== "") {
-          // Special handling for 'power'
-          if (formattedField === 'Power') {
-            const powerValue = capitalizeWords(value);
-            const matchingPower = superheroPowers.find(
-              (powers) => powers[powerValue] === 'True' && powers.hero_names === hero.name
-            );
-  
-            if (!matchingPower) {
-              isMatch = false;
-              break;
-            }
-          } else if (!hero[formattedField].toLowerCase().startsWith(value.toLowerCase())) {
-            // Check if the hero field starts with the search term
+
+// Modified match function to handle soft matching
+function match(searchParams) {
+  const matchingResults = [];
+
+  for (const hero of superheroes) {
+    let isMatch = true;
+
+    for (const [field, value] of Object.entries(searchParams)) {
+      const formattedField = field !== 'name' ? field.charAt(0).toUpperCase() + field.slice(1) : field;
+
+      // Check if the search term is provided
+      if (value !== undefined && value !== null && value.trim() !== "") {
+        // Special handling for 'power'
+        if (formattedField === 'Power') {
+          const powerValue = capitalizeWords(value);
+          const matchingPower = superheroPowers.find(
+            (powers) => powers[powerValue] === 'True' && powers.hero_names === hero.name
+          );
+
+          if (!matchingPower) {
             isMatch = false;
             break;
           }
+        } else if (!softMatch(hero[formattedField], value)) {
+          // Check if the hero field soft matches the search term
+          isMatch = false;
+          break;
         }
       }
-  
-      if (isMatch) {
-        matchingResults.push({...hero, Power: getPower(hero.name)}); // Push the entire hero object
-      }
     }
-  
-    return matchingResults;
+
+    if (isMatch) {
+      matchingResults.push({ ...hero, Power: getPower(hero.name) }); // Push the entire hero object
+    }
   }
+
+  return matchingResults;
+}
+
+// Soft match function
+function softMatch(str1, str2) {
+  // Case-insensitive match
+  const lowerStr1 = str1.toLowerCase();
+  const lowerStr2 = str2.toLowerCase();
+
+  // Remove white spaces
+  const trimmedStr1 = lowerStr1.replace(/\s/g, "");
+  const trimmedStr2 = lowerStr2.replace(/\s/g, "");
+
+  // Check if up to two characters are missing or different
+  const maxLength = Math.max(trimmedStr1.length, trimmedStr2.length);
+  let differences = 0;
+  for (let i = 0; i < maxLength; i++) {
+    if (trimmedStr1[i] !== trimmedStr2[i]) {
+      differences++;
+    }
+    if (differences > 2) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
   function getPower(heroName) {
     const matchingPower = superheroPowers.find((powers) => powers.hero_names === heroName);
@@ -276,6 +290,18 @@ function readSuperheroesData(filename) {
     res.status(200).json(superheroResults);
   });
   
+  function sortSuperheroes(superheroes, sortBy) {
+    sortBy = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
+    return superheroes.sort((a, b) => {
+      const valueA = String(a[sortBy]).toLowerCase();
+      const valueB = String(b[sortBy]).toLowerCase();
+  
+      if (valueA < valueB) return -1;
+      if (valueA > valueB) return 1;
+      return 0;
+    });
+  }
+
   router.get('/getId/:heroName' , (req, res) => {
     let heroName = req.params.heroName;
     let hero = superheroes.find(hero => hero.name.toLowerCase() === heroName.toLowerCase());

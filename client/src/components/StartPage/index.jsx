@@ -13,6 +13,7 @@ const CombinedStartPageAndSearch = () => {
     publisher: "",
   });
   const [searchResults, setSearchResults] = useState([]);
+  const [expandedResult, setExpandedResult] = useState(null);
 
 
   
@@ -71,10 +72,29 @@ const CombinedStartPageAndSearch = () => {
         <div key={hero.id || index} className={styles.heroCard}>
           <p>Name: {hero.name}</p>
           <p>Publisher: {hero.Publisher}</p>
-          <p>Race: {hero.Race}</p>
-          <p>Power: {hero.Power}</p>
+
+          {/* Additional information */}
+          {expandedResult === index && (
+            <>
+              <p>Gender: {hero.Gender}</p>
+              <p>Eye color: {hero["Eye color"]}</p>
+              <p>Race: {hero.Race}</p>
+              <p>Hair color: {hero["Hair color"]}</p>
+              <p>Height: {hero.Height}</p>
+              <p>Weight: {hero.Weight}</p>
+              <p>Alignment: {hero.Alignment}</p>
+              <p>Skin Color: {hero["Skin color"]} </p>
+              <p>Power: {hero.Power}</p>
+            </>
+          )}
+
+          {/* Toggle button */}
+          <button onClick={() => setExpandedResult((prevIndex) => (prevIndex === index ? null : index))}>
+            {expandedResult === index ? "Collapse" : "Expand"}
+          </button>
         </div>
-))}
+      ))}
+
 
 
       <Link to="/login">

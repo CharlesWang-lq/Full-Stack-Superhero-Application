@@ -43,7 +43,7 @@ function readSuperheroesData(filename) {
   const superheroes = readSuperheroesData('superhero_info.json');
   const superheroPowers = readSuperheroesData('superhero_powers.json');
   
-  app.use('/api/superheroes/', router);
+  app.use('/api/heroes/', router);
   //get all powers for a given superhero id
   
   //return all the lists created
@@ -87,14 +87,19 @@ function readSuperheroesData(filename) {
     }
   );
   
-  router.get('/search/:searchBy/:searchField/:number', (req, res) => {
+  router.get('/search', (req, res) => {
     const sortBy = req.query.sortBy;
-    let heroes = match(req.params.searchBy, req.params.searchField, req.params.number);
-    if(sortBy){
-      heroes = sortSuperheroes(heroes, sortBy);
-    }
-    res.send(heroes)
-  })
+    const searchParams = req.query;
+  
+    let heroes = match(searchParams);
+  
+    // if (sortBy) {
+    //   heroes = sortSuperheroes(heroes, sortBy);
+    // }
+  
+    res.send({ results: heroes });
+  });
+  
   function sortSuperheroes(superheroes, sortBy) {
     sortBy = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
     return superheroes.sort((a, b) => {
@@ -106,49 +111,72 @@ function readSuperheroesData(filename) {
       return 0;
     });
   }
+
+  // Modified match function to handle multiple search terms
+  function match(searchParams) {
+    const matchingResults = [];
   
-  //create a match function
-  function match(pattern, field, number){
-    let matchingResults = [];
-    let searchField = field.toLowerCase();
+    for (const hero of superheroes) {
+      let isMatch = true;
   
+      for (const [field, value] of Object.entries(searchParams)) {
+        const formattedField = field !== 'name' ? field.charAt(0).toUpperCase() + field.slice(1) : field;
   
-    if(pattern == "Power"){
-      let formattedField = searchField.replace(/\b\w/g, (char) => char.toUpperCase());
-      for(powers of superheroPowers)  {
-        if(powers[formattedField] == "True"){
-          let hero = superheroes.find(hero => hero.name === powers.hero_names);
-          if(hero){
-            matchingResults.push(hero);
+        // Check if the search term is provided
+        if (value !== undefined && value !== null && value !== "") {
+          // Special handling for 'power'
+          if (formattedField === 'Power') {
+            const powerValue = capitalizeWords(value);
+            const matchingPower = superheroPowers.find(
+              (powers) => powers[powerValue] === 'True' && powers.hero_names === hero.name
+            );
+  
+            if (!matchingPower) {
+              isMatch = false;
+              break;
+            }
+          } else if (!hero[formattedField].toLowerCase().startsWith(value.toLowerCase())) {
+            // Check if the hero field starts with the search term
+            isMatch = false;
+            break;
           }
         }
       }
-    }
   
-    if(pattern == "Name"){
-      for(hero of superheroes){
-        if(hero["name"].toLowerCase().includes(searchField))
-          matchingResults.push(hero);
+      if (isMatch) {
+        matchingResults.push({...hero, Power: getPower(hero.name)}); // Push the entire hero object
       }
     }
   
-    if(pattern == "Publisher"){
-      for(hero of superheroes){
-        if(hero["Publisher"].toLowerCase().includes(searchField))
-          matchingResults.push(hero);
-      }
+    return matchingResults;
+  }
+
+  function getPower(heroName) {
+    const matchingPower = superheroPowers.find((powers) => powers.hero_names === heroName);
+  
+    if (!matchingPower) {
+      return null; // Return null if no matching power is found
     }
   
-    if(pattern == "Race"){
-      for(hero of superheroes){
-        if(hero["Race"].toLowerCase().includes(searchField))
-          matchingResults.push(hero);
-      }
-    }
-    return matchingResults.slice(0, number);
+    // Filter out powers that are not true and join them with spaces
+    const truePowers = Object.entries(matchingPower)
+      .filter(([power, value]) => power !== 'hero_names' && value === 'True')
+      .map(([power]) => power)
+      .join(' ');
   
+    return truePowers.length > 0 ? truePowers : null;
   }
   
+  
+  
+  
+  function capitalizeWords(inputString) {
+    inputString = inputString.toLowerCase();
+    return inputString.replace(/\b\w/g, function(match) {
+        return match.toUpperCase();
+    });
+}
+
   //search superheroes by id
   router.get('/:superheroId', (req, res) => {
     const id = req.params.superheroId;

@@ -150,20 +150,62 @@ function softMatch(str1, str2) {
   const trimmedStr1 = lowerStr1.replace(/\s/g, "");
   const trimmedStr2 = lowerStr2.replace(/\s/g, "");
 
-  // Check if up to two characters are missing or different
-  const maxLength = Math.max(trimmedStr1.length, trimmedStr2.length);
-  let differences = 0;
-  for (let i = 0; i < maxLength; i++) {
-    if (trimmedStr1[i] !== trimmedStr2[i]) {
-      differences++;
+  // Check if str1 contains str2 at the beginning
+  if (trimmedStr1.indexOf(trimmedStr2) === 0) {
+    // Check if more than two characters are provided
+    if (trimmedStr2.length > 2) {
+      let gap = Math.abs(trimmedStr1.length - trimmedStr2.length);
+
+      // Check if the gap is less than 3
+      if (gap <= 2) {
+        // Compare two strings to see which one has more letters
+        let longerStr = trimmedStr1.length >= trimmedStr2.length ? trimmedStr1 : trimmedStr2;
+        let shorterStr = trimmedStr1.length < trimmedStr2.length ? trimmedStr1 : trimmedStr2;
+
+        // Subtract the shorter one from the longer one to see the exact gap
+        let diff = longerStr.length - shorterStr.length;
+
+        // Check if the gap is less than 3
+        if (diff <= 2) {
+          // Check if deleting the last one letter from the longer string results in a match
+          let modifiedStr1One = longerStr.substring(0, longerStr.length - 1);
+          if (modifiedStr1One.indexOf(shorterStr) === 0) {
+            return true;
+          }
+
+          // Check if deleting the last two letters from the longer string results in a match
+          let modifiedStr1Two = longerStr.substring(0, longerStr.length - 2);
+          if (modifiedStr1Two.indexOf(shorterStr) === 0) {
+            return true;
+          }
+        }
+      }
+
+      // Check if the gap is 0
+      if (gap === 0) {
+        // Check if deleting one letter from str1 results in a match
+        let modifiedStr2 = trimmedStr2.slice(0, -1);
+        if (modifiedStr2.indexOf(trimmedStr1) === 0) {
+          return true;
+        }
+
+        // Check if deleting two letters from str1 results in a match
+        modifiedStr2 = trimmedStr2.slice(0, -2);
+        if (modifiedStr2.indexOf(trimmedStr1) === 0) {
+          return true;
+        }
+      }
     }
-    if (differences > 2) {
-      return false;
-    }
+
+    return true;
   }
 
-  return true;
+  return false;
 }
+
+
+
+
 
   function getPower(heroName) {
     const matchingPower = superheroPowers.find((powers) => powers.hero_names === heroName);

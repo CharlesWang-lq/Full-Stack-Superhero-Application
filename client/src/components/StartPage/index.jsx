@@ -32,6 +32,11 @@ const CombinedStartPageAndSearch = () => {
     }
   };
 
+  const handleDDGSearch = (hero) => {
+    const ddgSearchQuery = `${hero.name} ${hero.Publisher}`;
+    window.open(`https://duckduckgo.com/?q=${encodeURIComponent(ddgSearchQuery)}`, "_blank");
+  };
+
   return (
     <div className={styles.container}>
       <h2>Superhero Search</h2>
@@ -92,8 +97,13 @@ const CombinedStartPageAndSearch = () => {
           <button onClick={() => setExpandedResult((prevIndex) => (prevIndex === index ? null : index))}>
             {expandedResult === index ? "Collapse" : "Expand"}
           </button>
+
+          {/* Search on DDG button */}
+          <button onClick={() => handleDDGSearch(hero)}>Search on DDG</button>
         </div>
       ))}
+
+      
 
 
 

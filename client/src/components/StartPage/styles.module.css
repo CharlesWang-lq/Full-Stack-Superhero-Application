@@ -67,4 +67,26 @@
     top: 10px;
     right: 10px;
   }
+
+  .publicListsContainer {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  h2 {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .listCard {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #fff;
+  }
+  
+  .listCard p {
+    margin: 5px 0;
+    color: #555;
+  }
   

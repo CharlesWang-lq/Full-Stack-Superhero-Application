@@ -9,6 +9,7 @@ const connection = require("./db");
 const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
 const updateRoutes = require("./routes/update");
+const listRoutes = require("./routes/list");
 
 const port = 3000;
 const mainDir = path.join(__dirname, '../');
@@ -28,6 +29,7 @@ app.use(cors());
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/update", updateRoutes);
+app.use("/api/list", listRoutes);
 
 //read superhero data from file
 function readSuperheroesData(filename) {
@@ -45,7 +47,43 @@ function readSuperheroesData(filename) {
   
   app.use('/api/heroes/', router);
   //get all powers for a given superhero id
-  
+
+
+
+router.get('/details', (req, res) => {
+  const heroNames = req.query.heroNames;
+
+  if (!heroNames || !Array.isArray(heroNames) || heroNames.length === 0) {
+
+    return res.status(400).json({ error: 'Invalid or empty heroNames parameter' });
+  }
+
+  try {
+    const heroesDetails = getHeroesDetails(heroNames);
+    res.json({ results: heroesDetails });
+  } catch (error) {
+    console.error('Error fetching hero details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Function to get hero details based on names
+function getHeroesDetails(heroNames) {
+  const heroesDetails = [];
+
+  for (const heroName of heroNames) {
+    const hero = superheroes.find((hero) => hero.name === heroName);
+
+    if (hero) {
+      const powers = superheroPowers.filter((powers) => powers.hero_names === hero.name);
+      heroesDetails.push({ ...hero, Power: getPower(hero.name), Powers: powers });
+    }
+  }
+
+  return heroesDetails;
+}
+
+
   //return all the lists created
   router.get('/lists', (req, res) => {
     res.status(200).json(superheroList);

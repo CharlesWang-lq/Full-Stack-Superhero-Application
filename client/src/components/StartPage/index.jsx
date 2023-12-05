@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import styles from "./styles.module.css";
@@ -12,9 +12,60 @@ const CombinedStartPageAndSearch = () => {
     power: "",
     publisher: "",
   });
+
+  // Reusable component for displaying hero details
+
   const [searchResults, setSearchResults] = useState([]);
   const [expandedResult, setExpandedResult] = useState(null);
+  const [publicLists, setPublicLists] = useState([]);
+  const [expandedLists, setExpandedLists] = useState([]);
+  const [expandedHeroDetails, setExpandedHeroDetails] = useState(null);
+  const [heroDetails, setHeroDetails] = useState([]);
 
+
+  useEffect(() => {
+    const fetchPublicLists = async () => {
+      try {
+        const response = await axios.get(`http://${myurl}:${port}/api/list`);
+        setPublicLists(response.data);
+      } catch (error) {
+        console.error("Error fetching public lists:", error);
+      }
+    };
+
+    fetchPublicLists();
+  }, []);
+
+  const fetchHeroDetails = async (listId) => {
+    const list = publicLists.find((list) => list.id === listId);
+
+    if (list) {
+      try {
+        const response = await axios.get(`http://${myurl}:${port}/api/heroes/details`, {
+          params: { heroNames: list.heroes },
+        });
+        setHeroDetails(response.data);
+        console.log(response.data)
+      } catch (error) {
+        console.error("Error fetching hero details:", error);
+      }
+    }
+  };
+
+  const handleListToggle = async (listId) => {
+    setExpandedLists((prevLists) =>
+      prevLists.includes(listId) ? prevLists.filter((id) => id !== listId) : [...prevLists, listId]
+    );
+  };
+  
+  const handleHeroDetailsToggle = async (index, listId) => {
+    // Fetch hero details when expanding the hero details
+    if (index !== null && listId !== null) {
+      await fetchHeroDetails(listId);
+    }
+
+    setExpandedHeroDetails((prevIndex) => (prevIndex === index ? null : index));
+  };
 
   
   const handleSearch = async () => {
@@ -103,7 +154,56 @@ const CombinedStartPageAndSearch = () => {
         </div>
       ))}
 
-      
+     
+          {/* Display public lists */}
+          <div className={styles.publicListsContainer}>
+                {publicLists.map((list, index) => (
+                  <div key={list.id} className={styles.listCard}>
+                    <p>List Name: {list.name}</p>
+                    <p>Creator: {list.creator.nickname}</p>
+                    <p>Number of Heroes: {list.heroes.length}</p>
+                    <p>Average Rating: {list.averageRating}</p>
+
+                    {/* Expand button/icon */}
+                    <button onClick={() => handleListToggle(list.id)}>
+                      {expandedLists.includes(list.id) ? "Collapse" : "Expand"}
+                    </button>
+
+                    {/* Additional information displayed when expanded */}
+                    {expandedLists.includes(list.id) && (
+                      <>
+                        <p>Description: {list.description}</p>
+                        <p>List of Heroes: {list.heroes.join(", ")}</p>
+
+                    {/* Button to toggle hero details */}
+                    <button onClick={() => handleHeroDetailsToggle(index, list.id)}>
+                      {expandedHeroDetails === index ? "Collapse Hero Details" : "Expand Hero Details"}
+                    </button>
+
+                    {/* Display hero details when expanded */}
+                    {expandedHeroDetails === index && (
+                        <div>
+                          {heroDetails.results.length > 0 ? (
+                            heroDetails.results.map((heroDetail, detailIndex) => (
+                              <div key={heroDetail.name || detailIndex} className={styles.heroDetails}>
+                                <p>Name: {heroDetail.name}</p>
+                                <p>Publisher: {heroDetail.Publisher}</p>
+                                {/* Add more details as needed */}
+                              </div>
+                            ))
+                          ) : (
+                            console.log(heroDetails.length),
+                            console.log(heroDetails),
+                            <p>Loading hero details...</p>
+                          )}
+                        </div>
+                      )}
+
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
 
 
 

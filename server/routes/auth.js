@@ -49,7 +49,9 @@ router.post("/", async (req, res) => {
 		}
 
 		const token = user.generateAuthToken();
-		res.status(200).send({ data: token, message: "logged in successfully" });
+		// Check if the user is an admin and include isAdmin in the response
+		const isAdmin = user.isAdmin || false;
+		res.status(200).send({ data: token, message: "logged in successfully", isAdmin: isAdmin });
 	} catch (error) {
 		res.status(500).send({ message: "Internal Server Error" });
 	}

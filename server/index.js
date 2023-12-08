@@ -10,6 +10,8 @@ const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
 const updateRoutes = require("./routes/update");
 const listRoutes = require("./routes/list");
+const verifyRoutes = require("./routes/verify")
+const policyRoutes = require("./routes/policy");
 
 const port = 3000;
 const mainDir = path.join(__dirname, '../');
@@ -30,6 +32,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/update", updateRoutes);
 app.use("/api/list", listRoutes);
+app.use("/api/verify", verifyRoutes);
+app.use("/api/policy", policyRoutes);
 
 //read superhero data from file
 function readSuperheroesData(filename) {
@@ -48,7 +52,7 @@ function readSuperheroesData(filename) {
   app.use('/api/heroes/', router);
   //get all powers for a given superhero id
 
-
+ 
 
 router.get('/details', (req, res) => {
   const heroNames = req.query.heroNames;
@@ -82,48 +86,6 @@ function getHeroesDetails(heroNames) {
 
   return heroesDetails;
 }
-
-
-  //return all the lists created
-  router.get('/lists', (req, res) => {
-    res.status(200).json(superheroList);
-  });
-  
-  router.get('/powers/:id', (req, res) => {
-      const id = req.params.id;
-      // Find the superhero by ID and retrieve their powers
-      const superhero = superheroes.find(hero => hero.id === parseInt(id));
-      if (superhero) {
-        const name = superhero.name;
-        const superpowerList = superheroPowers.find(hero => hero.hero_names === name);
-        let validPowers = [];
-        Object.keys(superpowerList).forEach(key=>{
-          if(superpowerList[key] === "True"){
-            validPowers.push(key);
-          }
-        })
-        res.send(validPowers);
-      } else {
-        res.status(404).json({ message: `Superhero with ID ${id} not found` });
-      }
-    });
-  
-    //get all available publisher names
-  router.get('/publishers', (req, res) => {
-      const publishers = [];
-      superheroes.forEach(hero => {
-        if (!publishers.includes(hero.Publisher)&&hero.Publisher!=="") {
-          publishers.push(hero.Publisher);
-        }
-      }
-      )
-      if(publishers){
-        res.send(publishers);
-      }else{
-        res.status(404).json({ message: `No publishers found` });
-      }
-    }
-  );
   
   router.get('/search', (req, res) => {
     const searchParams = req.query;
@@ -241,6 +203,30 @@ function softMatch(str1, str2) {
   return false;
 }
 
+router.get('/exists', async (req, res) => {
+  const { names } = req.query;
+
+  // Check if names parameter is provided
+  if (!names || !Array.isArray(names) || names.length === 0) {
+    return res.status(400).send("Please provide an array of hero names.");
+  }
+
+  const existingHeroes = [];
+
+  // Check if each hero name exists (case-insensitive)
+  for (const name of names) {
+    const existingHero = superheroes.find((hero) => hero.name.toLowerCase() === name.toLowerCase());
+    if (existingHero) {
+      existingHeroes.push(existingHero.name);
+    }
+  }
+
+  res.send({ existingHeroes });
+});
+
+
+
+
 
 
 
@@ -271,125 +257,168 @@ function softMatch(str1, str2) {
     });
 }
 
-  //search superheroes by id
-  router.get('/:superheroId', (req, res) => {
-    const id = req.params.superheroId;
-    const superhero = superheroes.find(hero => hero.id === parseInt(id));
-    if (superhero) {
-      res.send(superhero);
-    } else {
-      res.status(404).json({ message: `Superhero with ID ${id} not found` });
-    }
-  });
-  
-  //Create a new list to save a list of superheroes with a given list name. Return an error if name exists
-  router.post('/lists/:listName', (req, res) => {
-    const listName = req.params.listName;
-    //check if list already exists
-    const existingList = superheroList.find(list => list.name === listName);
-    if (existingList) {
-      res.status(409).json({ message: `List with name ${listName} already exists` });
-    } else {
-      //create a new listF
-      const newList = { name: listName, superheroesIDs: [] };
-      superheroList.push(newList);
-      res.status(201).json(superheroList);
-    }
-  });
-  
-  // Route to save superhero IDs to a superhero list
-  router.put('/lists/:listName/:superhero_id', (req, res) => {
-    const listName = req.params.listName;
-    const superheroId = req.params.superhero_id;
-    // Find the list by name
-    const listIndex = superheroList.findIndex(list => list.name === listName);
-    if (listIndex === -1) {
-      return res.status(404).json({ message: `List with name '${listName}' does not exist` });
-    }
-  
-    // add additional the superhero IDs for the list
-    // Check for uniqueness
-    if (superheroList[listIndex].superheroesIDs.includes(parseInt(superheroId))) {
-      return res.status(400).json({ message: `Superhero ID '${superheroId}' already exists in the list` });
-    }
-    //check for null, undefined or not an integer
-    if (superheroId === null || superheroId === undefined || isNaN(superheroId)) {
-      return res.status(400).json({ message: `Superhero ID '${superheroId}' is not valid` });
-    }
-    superheroList[listIndex].superheroesIDs.push(parseInt(superheroId));
-    res.status(200).json({ message: 'Superhero IDs saved to the list successfully' });
-  });
-  
-  router.get('/lists/:listName', (req, res) => {
-    const listName = req.params.listName;
-    // Find the list by name
-    const listIndex = superheroList.findIndex(list => list.name === listName);
-    if (listIndex === -1) {
-      return res.status(404)({ message: `List with name '${listName}' does not exist` });
-    }
-    res.status(200).json(superheroList[listIndex].superheroesIDs);
-  });
-  
-  router.delete('/lists/:listName', (req, res) => {
-    const listName = req.params.listName;
-    // Find the list by name
-    const listIndex = superheroList.findIndex(list => list.name === listName);
-    if (listIndex === -1) {
-      return res.status(404).json({ message: `List with name '${listName}' does not exist` });
-    }
-    superheroList.splice(listIndex, 1);
-    res.status(200).json({ superheroList, message: `List with name '${listName}' deleted successfully` });
-  });
-  
-  //Get a list of names, information and powers of all superheroes saved in a given list.
-  router.get('/lists/:listName/superheroes', (req, res) => {
-    let listName = req.params.listName;
-    const sortBy = req.query.sortBy;
-  
-    let list = superheroList.find(list => list.name === listName);
-    if (!list) {
-      return res.status(404).json({ message: `List with name '${listName}' does not exist` });
-    }
-  
-    let superheroIds = list.superheroesIDs;
-    let superheroesInTheList = superheroes.filter(hero => superheroIds.includes(hero.id));
-    let superheroResults = superheroesInTheList.map(hero => {
-      let heroPowers = superheroPowers.find(power => power.hero_names === hero.name);
-      const validPowers = heroPowers
-        ? Object.keys(heroPowers).filter(key => heroPowers[key] === "True")
-        : []; //in case if it's undefined
-  
-      return { ...hero, power: validPowers };
-    });
-  
-    // Apply sorting if sortBy is provided
-    if (sortBy) {
-      superheroResults = sortSuperheroes(superheroResults, sortBy);
-    }
-  
-    res.status(200).json(superheroResults);
-  });
-  
-  function sortSuperheroes(superheroes, sortBy) {
-    sortBy = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
-    return superheroes.sort((a, b) => {
-      const valueA = String(a[sortBy]).toLowerCase();
-      const valueB = String(b[sortBy]).toLowerCase();
-  
-      if (valueA < valueB) return -1;
-      if (valueA > valueB) return 1;
-      return 0;
-    });
-  }
 
-  router.get('/getId/:heroName' , (req, res) => {
-    let heroName = req.params.heroName;
-    let hero = superheroes.find(hero => hero.name.toLowerCase() === heroName.toLowerCase());
-    if(!hero){
-      return res.status(404).json({ message: `Hero with name '${heroName}' does not exist` });
-    }
-    res.status(200).json(hero.id);
-  });
+
+  //return all the lists created
+//   router.get('/lists', (req, res) => {
+//     res.status(200).json(superheroList);
+//   });
+  
+//   router.get('/powers/:id', (req, res) => {
+//       const id = req.params.id;
+//       // Find the superhero by ID and retrieve their powers
+//       const superhero = superheroes.find(hero => hero.id === parseInt(id));
+//       if (superhero) {
+//         const name = superhero.name;
+//         const superpowerList = superheroPowers.find(hero => hero.hero_names === name);
+//         let validPowers = [];
+//         Object.keys(superpowerList).forEach(key=>{
+//           if(superpowerList[key] === "True"){
+//             validPowers.push(key);
+//           }
+//         })
+//         res.send(validPowers);
+//       } else {
+//         res.status(404).json({ message: `Superhero with ID ${id} not found` });
+//       }
+//     });
+  
+
+//    //get all available publisher names
+//    router.get('/publishers', (req, res) => {
+//     const publishers = [];
+//     superheroes.forEach(hero => {
+//       if (!publishers.includes(hero.Publisher)&&hero.Publisher!=="") {
+//         publishers.push(hero.Publisher);
+//       }
+//     }
+//     )
+//     if(publishers){
+//       res.send(publishers);
+//     }else{
+//       res.status(404).json({ message: `No publishers found` });
+//     }
+//   }
+// );
+//   //search superheroes by id
+//   router.get('/:superheroId', (req, res) => {
+//     const id = req.params.superheroId;
+//     const superhero = superheroes.find(hero => hero.id === parseInt(id));
+//     if (superhero) {
+//       res.send(superhero);
+//     } else {
+//       res.status(404).json({ message: `Superhero with ID ${id} not found` });
+//     }
+//   });
+  
+//   //Create a new list to save a list of superheroes with a given list name. Return an error if name exists
+//   router.post('/lists/:listName', (req, res) => {
+//     const listName = req.params.listName;
+//     //check if list already exists
+//     const existingList = superheroList.find(list => list.name === listName);
+//     if (existingList) {
+//       res.status(409).json({ message: `List with name ${listName} already exists` });
+//     } else {
+//       //create a new listF
+//       const newList = { name: listName, superheroesIDs: [] };
+//       superheroList.push(newList);
+//       res.status(201).json(superheroList);
+//     }
+//   });
+  
+//   // Route to save superhero IDs to a superhero list
+//   router.put('/lists/:listName/:superhero_id', (req, res) => {
+//     const listName = req.params.listName;
+//     const superheroId = req.params.superhero_id;
+//     // Find the list by name
+//     const listIndex = superheroList.findIndex(list => list.name === listName);
+//     if (listIndex === -1) {
+//       return res.status(404).json({ message: `List with name '${listName}' does not exist` });
+//     }
+  
+//     // add additional the superhero IDs for the list
+//     // Check for uniqueness
+//     if (superheroList[listIndex].superheroesIDs.includes(parseInt(superheroId))) {
+//       return res.status(400).json({ message: `Superhero ID '${superheroId}' already exists in the list` });
+//     }
+//     //check for null, undefined or not an integer
+//     if (superheroId === null || superheroId === undefined || isNaN(superheroId)) {
+//       return res.status(400).json({ message: `Superhero ID '${superheroId}' is not valid` });
+//     }
+//     superheroList[listIndex].superheroesIDs.push(parseInt(superheroId));
+//     res.status(200).json({ message: 'Superhero IDs saved to the list successfully' });
+//   });
+  
+//   router.get('/lists/:listName', (req, res) => {
+//     const listName = req.params.listName;
+//     // Find the list by name
+//     const listIndex = superheroList.findIndex(list => list.name === listName);
+//     if (listIndex === -1) {
+//       return res.status(404)({ message: `List with name '${listName}' does not exist` });
+//     }
+//     res.status(200).json(superheroList[listIndex].superheroesIDs);
+//   });
+  
+//   router.delete('/lists/:listName', (req, res) => {
+//     const listName = req.params.listName;
+//     // Find the list by name
+//     const listIndex = superheroList.findIndex(list => list.name === listName);
+//     if (listIndex === -1) {
+//       return res.status(404).json({ message: `List with name '${listName}' does not exist` });
+//     }
+//     superheroList.splice(listIndex, 1);
+//     res.status(200).json({ superheroList, message: `List with name '${listName}' deleted successfully` });
+//   });
+  
+//   //Get a list of names, information and powers of all superheroes saved in a given list.
+//   router.get('/lists/:listName/superheroes', (req, res) => {
+//     let listName = req.params.listName;
+//     const sortBy = req.query.sortBy;
+  
+//     let list = superheroList.find(list => list.name === listName);
+//     if (!list) {
+//       return res.status(404).json({ message: `List with name '${listName}' does not exist` });
+//     }
+  
+//     let superheroIds = list.superheroesIDs;
+//     let superheroesInTheList = superheroes.filter(hero => superheroIds.includes(hero.id));
+//     let superheroResults = superheroesInTheList.map(hero => {
+//       let heroPowers = superheroPowers.find(power => power.hero_names === hero.name);
+//       const validPowers = heroPowers
+//         ? Object.keys(heroPowers).filter(key => heroPowers[key] === "True")
+//         : []; //in case if it's undefined
+  
+//       return { ...hero, power: validPowers };
+//     });
+  
+//     // Apply sorting if sortBy is provided
+//     if (sortBy) {
+//       superheroResults = sortSuperheroes(superheroResults, sortBy);
+//     }
+  
+//     res.status(200).json(superheroResults);
+//   });
+  
+//   function sortSuperheroes(superheroes, sortBy) {
+//     sortBy = sortBy.charAt(0).toUpperCase() + sortBy.slice(1);
+//     return superheroes.sort((a, b) => {
+//       const valueA = String(a[sortBy]).toLowerCase();
+//       const valueB = String(b[sortBy]).toLowerCase();
+  
+//       if (valueA < valueB) return -1;
+//       if (valueA > valueB) return 1;
+//       return 0;
+//     });
+//   }
+
+  // router.get('/getId/:heroName' , (req, res) => {
+  //   let heroName = req.params.heroName;
+  //   let hero = superheroes.find(hero => hero.name.toLowerCase() === heroName.toLowerCase());
+  //   if(!hero){
+  //     return res.status(404).json({ message: `Hero with name '${heroName}' does not exist` });
+  //   }
+  //   res.status(200).json(hero.id);
+  // });
 
 
 app.listen(port, console.log(`Listening on port ${port}...`));

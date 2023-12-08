@@ -28,7 +28,12 @@ const Login = () => {
       }
 
       localStorage.setItem("token", res.data);
-      window.location = "/";
+       // Check if the user is an admin and redirect to the admin page
+       if (res.isAdmin) {
+        window.location = "/admin"; // Replace with your admin page route
+      } else {
+        window.location = "/";
+      }
     } catch (error) {
       if (
         error.response &&

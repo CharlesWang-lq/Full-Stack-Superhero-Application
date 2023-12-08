@@ -162,7 +162,6 @@ const CombinedStartPageAndSearch = () => {
                     <p>List Name: {list.name}</p>
                     <p>Creator: {list.creator.nickname}</p>
                     <p>Number of Heroes: {list.heroes.length}</p>
-                    <p>Average Rating: {list.averageRating}</p>
 
                     {/* Expand button/icon */}
                     <button onClick={() => handleListToggle(list.id)}>
@@ -174,6 +173,20 @@ const CombinedStartPageAndSearch = () => {
                       <>
                         <p>Description: {list.description}</p>
                         <p>List of Heroes: {list.heroes.join(", ")}</p>
+                        <p>Reviews:</p>
+                      {list.reviews.map((review, index) => (
+                        // Check if review.isVisible is true before rendering
+                        review.isVisible && (
+                          <div key={index}>
+                            <p>User: {review.userName}</p>
+                            <p>Average Rating: {list.averageRating}</p>
+                            <p>Rating: {review.rating}</p>
+                            <p>Comment: {review.comments}</p>
+                            <p>Created At: {review.createdAt}</p>
+                          </div>
+                        )
+                      ))}
+
 
                     {/* Button to toggle hero details */}
                     <button onClick={() => handleHeroDetailsToggle(index, list.id)}>
@@ -207,12 +220,19 @@ const CombinedStartPageAndSearch = () => {
 
 
 
+
       <Link to="/login">
         <button type="button" className={styles["login-button"]}>
           Login
         </button>
       </Link>
+      <Link to="/policy">Privacy and Security Policy</Link>
+      <br />
+      <Link to="/dmca">DMCA Policy</Link>
+      <br />
+      <Link to = "/aup">acceptable use policy </Link>
     </div>
+    
   );
 };
 

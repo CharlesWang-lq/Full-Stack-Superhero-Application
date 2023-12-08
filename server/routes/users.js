@@ -40,6 +40,45 @@ router.post("/", async (req, res) => {
 	}
 });
 
+router.get('/users', async (req, res) => {
+	try {
+	  // Fetch all users from the database
+	  const users = await User.find({});
+  
+	  res.json(users);
+	} catch (error) {
+	  console.error('Error fetching users:', error);
+	  res.status(500).json({ message: 'Internal Server Error' });
+	}
+  });
+
+  // Express route to grant admin privileges to a user
+router.post('/grantadmin/:userId', async (req, res) => {
+	try {
+	  const { userId } = req.params;
+  
+	  // Check if the user with the specified ID exists
+	  const user = await User.findById(userId);
+	  if (!user) {
+		return res.status(404).json({ message: 'User not found' });
+	  }
+  
+	  // Check if the user is already an admin
+	  if (user.isAdmin) {
+		return res.status(400).json({ message: 'User is already an admin' });
+	  }
+  
+	  // Grant admin privileges
+	  user.isAdmin = true;
+	  await user.save();
+  
+	  res.json({ message: 'Admin privileges granted successfully' });
+	} catch (error) {
+	  console.error('Error granting admin privileges:', error);
+	  res.status(500).json({ message: 'Internal Server Error' });
+	}
+  });
+
 router.post("/deactivate", async (req, res) => {
 	try {
 	  const { email } = req.body;
@@ -80,5 +119,25 @@ router.get("/:id/verify/:token/", async (req, res) => {
 		res.status(500).send({ message: "Internal Server Error" });
 	}
 });
+
+// Add this to your router handling admin actions
+router.put("/deactivate/:userId", async (req, res) => {
+	try {
+	  const user = await User.findById(req.params.userId);
+  
+	  if (!user) {
+		return res.status(404).send({ message: "User not found" });
+	  }
+  
+	  user.isDeactivated = !user.isDeactivated;
+	  await user.save();
+  
+	  res.status(200).send({ message: "User deactivation status updated" });
+	} catch (error) {
+	  console.error("Error deactivating user:", error);
+	  res.status(500).send({ message: "Internal Server Error" });
+	}
+  });
+  
 
 module.exports = router;

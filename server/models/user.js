@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
 	password: { type: String, required: true },
 	verified: { type: Boolean, default: false },
 	isDeactivated: { type: Boolean, default: false },
+	isAdmin: { type: Boolean, default: false },
 });
 
 userSchema.methods.generateAuthToken = function () {

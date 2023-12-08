@@ -1,8 +1,9 @@
-/* Reset some default margin and padding */
+/* styles.module.css */
+
 body, h1, p {
 	margin: 0;
 	padding: 0;
-	box-sizing: border-box; /* Include padding and border in the element's total width and height */
+	box-sizing: border-box;
   }
   
   /* Improved Navbar styling */
@@ -44,19 +45,101 @@ body, h1, p {
 	transform: scale(1.08); /* Increased scale effect on hover */
   }
   
-  /* Responsive design for smaller screens */
-  @media (max-width: 768px) {
-	.navbar {
-	  height: 60px; /* Adjust height for smaller screens */
-	}
-  
-	.navbar h1 {
-	  font-size: 22px; /* Decrease font size for smaller screens */
-	}
-  
-	.white_btn {
-	  padding: 12px 20px; /* Adjust button padding for smaller screens */
-	  font-size: 14px; /* Decrease font size for smaller screens */
-	}
+  /* Update Password Container styling */
+  .updatePasswordContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 20px; /* Adjusted margin-top */
+	width: 300px; /* Adjust the width as needed */
+	border: 2px solid #000; /* Solid black border */
+	padding: 20px; /* Add padding for a cleaner look */
+	border-radius: 8px; /* Optional: Add border-radius for rounded corners */
   }
+  
+  .updatePasswordContainer input {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 15px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+  }
+  
+  .updatePasswordContainer label {
+	display: block;
+	margin-bottom: 8px;
+  }
+  
+  .updatePasswordContainer button {
+	background-color: #3498db; /* Blue accent color */
+	color: #ecf0f1; /* Light text color */
+	padding: 12px 20px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+  }
+  
+  .updatePasswordContainer button:hover {
+	background-color: #2980b9; /* Darker shade for hover effect */
+  }
+  
+  /* Create List Container styling */
+  .createListContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin: auto;
+	margin-top: 100px; /* Adjusted margin-top */
+	width: 300px; /* Adjust the width as needed */
+	border: 2px solid #000; /* Solid black border */
+	padding: 20px; /* Add padding for a cleaner look */
+	border-radius: 8px; /* Optional: Add border-radius for rounded corners */
+  }
+  
+  .createListContainer input,
+  .createListContainer textarea,
+  .createListContainer select {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 15px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+  }
+  
+  .createListContainer label {
+	display: block;
+	margin-bottom: 8px;
+  }
+  
+
+/* styles.module.css */
+
+.displayListsContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center; /* Optional: to center text within child elements */
+  }
+  
+  
+  .createListContainer button {
+	background-color: #3498db; /* Blue accent color */
+	color: #ecf0f1; /* Light text color */
+	padding: 12px 20px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	
+  }
+  
+  .createListContainer button:hover {
+	background-color: #2980b9; /* Darker shade for hover effect */
+  }
+  
+ 
+
   
